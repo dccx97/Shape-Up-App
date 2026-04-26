@@ -200,9 +200,7 @@ export function Health({ healthLogs, metrics, addMetric, deleteMetric, addLog, u
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {[...healthLogs]
-                  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                  .map((log) => (
+                {chartData.map((log) => (
                   <tr key={log.id} className="hover:bg-slate-50 transition-colors">
                     <td className="p-4 text-sm font-medium text-slate-800 whitespace-nowrap">
                       <div className="flex items-center gap-2">
