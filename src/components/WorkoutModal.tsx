@@ -27,7 +27,9 @@ export function WorkoutModal({ onClose, onSave, initialData }: WorkoutModalProps
     schedule: initialData?.schedule || [],
     time: initialData?.time || '',
     category: initialData?.category || '',
-    exercises: initialData?.exercises || []
+    exercises: initialData?.exercises || [],
+    startDate: initialData?.startDate || format(new Date(), 'yyyy-MM-dd'),
+    endDate: initialData?.endDate || ''
   });
 
   const handleToggleDay = (dayId: number) => {
@@ -157,8 +159,30 @@ export function WorkoutModal({ onClose, onSave, initialData }: WorkoutModalProps
                   />
                 </div>
               ) : (
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Select Days</label>
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Start Date</label>
+                      <input
+                        type="date"
+                        required={!formData.isOneOff}
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                        value={formData.startDate || ''}
+                        onChange={e => setFormData({ ...formData, startDate: e.target.value })}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium text-slate-700 mb-2">End Date (Optional)</label>
+                      <input
+                        type="date"
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                        value={formData.endDate || ''}
+                        onChange={e => setFormData({ ...formData, endDate: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Select Days</label>
                   <div className="flex flex-wrap gap-2">
                     {DAYS.map(day => (
                       <button
@@ -178,6 +202,7 @@ export function WorkoutModal({ onClose, onSave, initialData }: WorkoutModalProps
                   {formData.schedule.length === 0 && (
                     <p className="text-xs text-red-500 mt-2">Please select at least one day.</p>
                   )}
+                  </div>
                 </div>
               )}
             </div>

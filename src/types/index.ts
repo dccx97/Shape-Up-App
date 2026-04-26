@@ -80,6 +80,7 @@ export interface HealthMetric {
   id: string;
   name: string;
   isDeletable: boolean;
+  unit?: string;
 }
 
 export interface HealthLog {
@@ -114,6 +115,8 @@ export interface Workout {
   time?: string; // HH:MM
   category?: string;
   exercises: WorkoutExercise[];
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface WorkoutLog {

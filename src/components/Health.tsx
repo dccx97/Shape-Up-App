@@ -8,7 +8,7 @@ import { format, parseISO } from 'date-fns';
 interface HealthProps {
   healthLogs: HealthLog[];
   metrics: HealthMetric[];
-  addMetric: (name: string) => void;
+  addMetric: (name: string, unit: string) => void;
   deleteMetric: (id: string) => void;
   addLog: (logData: Omit<HealthLog, 'id' | 'profileId' | 'editHistory'>) => void;
   updateLog: (id: string, logData: Omit<HealthLog, 'id' | 'profileId' | 'editHistory'>) => void;
@@ -30,6 +30,23 @@ export function Health({ healthLogs, metrics, addMetric, deleteMetric, addLog, u
     if (selectedMetric === 'visceralFat') return d.visceralFat !== undefined && d.visceralFat !== null;
     return d.customMetrics?.[selectedMetric] !== undefined && d.customMetrics?.[selectedMetric] !== null;
   });
+
+  const activeMetricObj = metrics.find(m => m.id === selectedMetric);
+  const getUnitString = () => {
+    if (!activeMetricObj?.unit) return '';
+    return activeMetricObj.unit === '%' ? '%' : ` ${activeMetricObj.unit}`;
+  };
+
+  const getFormattedValue = (log: any) => {
+    let val: number | undefined | null;
+    if (selectedMetric === 'weight') val = log.weight;
+    else if (selectedMetric === 'bodyFat') val = log.bodyFat;
+    else if (selectedMetric === 'visceralFat') val = log.visceralFat;
+    else val = log.customMetrics?.[selectedMetric];
+
+    if (val === undefined || val === null) return '-';
+    return `${val}${getUnitString()}`;
+  };
 
   // Chart Dimensions
   const SVG_WIDTH = 800;
@@ -136,13 +153,7 @@ export function Health({ healthLogs, metrics, addMetric, deleteMetric, addLog, u
                   <g key={i}>
                     <circle cx={p.x} cy={p.y} r="5" fill="#3b82f6" stroke="#fff" strokeWidth="2" className="hover:r-6 cursor-pointer transition-all duration-200" />
                     <text x={p.x} y={p.y - 12} textAnchor="middle" fontSize="12" fill="#475569" fontWeight="600">
-                      {(() => {
-                        const d = chartData[i];
-                        if (selectedMetric === 'weight') return d.weight;
-                        if (selectedMetric === 'bodyFat') return d.bodyFat;
-                        if (selectedMetric === 'visceralFat') return d.visceralFat;
-                        return d.customMetrics?.[selectedMetric];
-                      })()}
+                      {getFormattedValue(chartData[i])}
                     </text>
                     <text x={p.x} y={SVG_HEIGHT - PADDING_Y + 20} textAnchor="middle" fontSize="10" fill="#94a3b8">
                       {format(parseISO(chartData[i].date), 'MMM d')}
@@ -206,12 +217,7 @@ export function Health({ healthLogs, metrics, addMetric, deleteMetric, addLog, u
                       </div>
                     </td>
                     <td className="p-4 text-sm font-bold text-blue-600">
-                      {(() => {
-                        if (selectedMetric === 'weight') return log.weight;
-                        if (selectedMetric === 'bodyFat') return log.bodyFat ? `${log.bodyFat}%` : '-';
-                        if (selectedMetric === 'visceralFat') return log.visceralFat ?? '-';
-                        return log.customMetrics?.[selectedMetric] ?? '-';
-                      })()}
+                      {getFormattedValue(log)}
                     </td>
                     <td className="p-4 text-sm text-slate-600 max-w-[200px] truncate">
                       {log.notes || '-'}

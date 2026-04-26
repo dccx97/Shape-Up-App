@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { Activity, Mail, Lock, User, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 
 type AuthMode = 'login' | 'signup' | 'reset';

@@ -4,19 +4,21 @@ import type { HealthMetric } from '../types';
 
 interface AddMetricModalProps {
   metrics: HealthMetric[];
-  onAdd: (name: string) => void;
+  onAdd: (name: string, unit: string) => void;
   onDelete: (id: string) => void;
   onClose: () => void;
 }
 
 export function AddMetricModal({ metrics, onAdd, onDelete, onClose }: AddMetricModalProps) {
   const [newMetricName, setNewMetricName] = useState('');
+  const [newMetricUnit, setNewMetricUnit] = useState('');
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMetricName.trim()) return;
-    onAdd(newMetricName.trim());
+    onAdd(newMetricName.trim(), newMetricUnit);
     setNewMetricName('');
+    setNewMetricUnit('');
   };
 
   return (
@@ -32,23 +34,39 @@ export function AddMetricModal({ metrics, onAdd, onDelete, onClose }: AddMetricM
         </div>
 
         <div className="p-6 space-y-6">
-          <form onSubmit={handleAdd} className="flex items-end gap-3">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-slate-700 mb-1">New Metric Name</label>
-              <input
-                type="text"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                value={newMetricName}
-                onChange={e => setNewMetricName(e.target.value)}
-                placeholder="e.g. Muscle Mass"
-              />
+          <form onSubmit={handleAdd} className="flex flex-col gap-3">
+            <div className="flex items-end gap-3">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-slate-700 mb-1">New Metric Name</label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  value={newMetricName}
+                  onChange={e => setNewMetricName(e.target.value)}
+                  placeholder="e.g. Bicep Size"
+                />
+              </div>
+              <div className="w-32">
+                <label className="block text-sm font-medium text-slate-700 mb-1">Unit</label>
+                <select
+                  value={newMetricUnit}
+                  onChange={e => setNewMetricUnit(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all cursor-pointer bg-white"
+                >
+                  <option value="">None</option>
+                  <option value="lbs">lbs</option>
+                  <option value="%">%</option>
+                  <option value="in">in</option>
+                  <option value="reps">reps</option>
+                </select>
+              </div>
             </div>
             <button
               type="submit"
               disabled={!newMetricName.trim()}
-              className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed h-[42px]"
+              className="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Add
+              Add Metric
             </button>
           </form>
 

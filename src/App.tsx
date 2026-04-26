@@ -359,6 +359,7 @@ function App() {
             workouts={workouts}
             workoutLogs={workoutLogs}
             markWorkoutCompleted={markWorkoutCompleted}
+            onNavigate={(tab) => setActiveTab(tab)}
           />
         )}
         

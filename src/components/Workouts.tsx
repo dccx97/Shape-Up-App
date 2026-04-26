@@ -32,24 +32,34 @@ export function Workouts({ workouts, addWorkout, updateWorkout, deleteWorkout }:
           )}
         </div>
         
-        <div className="flex items-center gap-2 text-sm text-slate-500 mb-4">
-          {workout.isOneOff ? (
-            <>
-              <Calendar className="w-4 h-4 text-blue-500" />
-              <span>{workout.oneOffDate ? format(parseISO(workout.oneOffDate), 'MMM d, yyyy') : 'No Date'}</span>
-            </>
-          ) : (
-            <>
-              <Repeat className="w-4 h-4 text-emerald-500" />
-              <span>
-                {workout.schedule.length === 7 
-                  ? 'Every Day' 
-                  : workout.schedule.map(d => DAYS[d]).join(', ')}
-              </span>
-            </>
-          )}
-          {workout.time && (
-            <span className="ml-2 px-2 py-0.5 bg-slate-50 rounded text-xs font-mono">{workout.time}</span>
+        <div className="flex flex-col gap-1 mb-4">
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            {workout.isOneOff ? (
+              <>
+                <Calendar className="w-4 h-4 text-blue-500" />
+                <span>{workout.oneOffDate ? format(parseISO(workout.oneOffDate), 'MMM d, yyyy') : 'No Date'}</span>
+              </>
+            ) : (
+              <>
+                <Repeat className="w-4 h-4 text-emerald-500" />
+                <span>
+                  {workout.schedule.length === 7 
+                    ? 'Every Day' 
+                    : workout.schedule.map(d => DAYS[d]).join(', ')}
+                </span>
+              </>
+            )}
+            {workout.time && (
+              <span className="ml-2 px-2 py-0.5 bg-slate-50 rounded text-xs font-mono">{workout.time}</span>
+            )}
+          </div>
+          {!workout.isOneOff && workout.startDate && (
+            <div className="flex items-center gap-1.5 text-xs text-slate-400 ml-6">
+               <span className="font-semibold text-slate-500">Range:</span>
+               <span>
+                 {format(parseISO(workout.startDate), 'MMM d')} - {workout.endDate ? format(parseISO(workout.endDate), 'MMM d, yyyy') : 'Forever'}
+               </span>
+            </div>
           )}
         </div>
 

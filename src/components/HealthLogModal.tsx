@@ -114,7 +114,13 @@ export function HealthLogModal({ onClose, onSave, initialData, metrics, initialM
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Value</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Value
+              {(() => {
+                const activeMetric = metrics.find(m => m.id === selectedMetricId);
+                return activeMetric?.unit ? ` (${activeMetric.unit})` : '';
+              })()}
+            </label>
             <input
               type="number"
               step="0.1"
