@@ -14,6 +14,8 @@ import { useFiles } from './hooks/useFiles';
 import { useHealth } from './hooks/useHealth';
 import { useHealthMetrics } from './hooks/useHealthMetrics';
 import { useWorkouts } from './hooks/useWorkouts';
+import { useAuth } from './hooks/useAuth';
+import { Auth } from './components/Auth';
 
 type Theme = 'light' | 'dark' | 'tan' | 'rose';
 
@@ -45,6 +47,7 @@ function App() {
   const { healthLogs, addLog: addHealthLog, deleteLog: deleteHealthLog, updateLog: updateHealthLog } = useHealth(activeProfileId);
   const { metrics, addMetric, deleteMetric } = useHealthMetrics();
   const { workouts, workoutLogs, markWorkoutCompleted, addWorkout, updateWorkout, deleteWorkout } = useWorkouts(activeProfileId);
+  const { user, isLoading, signOut } = useAuth();
   
   const [activeTab, setActiveTab] = useState<'dashboard' | 'cabinet' | 'workouts' | 'health' | 'analytics' | 'files'>('dashboard');
   const [theme, setTheme] = useState<Theme>(() => {
@@ -70,17 +73,42 @@ function App() {
     if (theme === 'rose') document.body.classList.add('theme-rose');
   }, [theme]);
 
-  // ONBOARDING WALL: Force profile creation if none exist
-  if (profiles.length === 0 || isAddingProfile) {
+  // Create default profile if none exist for a newly signed up user
+  useEffect(() => {
+    if (user && !isLoading && profiles.length === 0 && !isAddingProfile) {
+      addProfile({ name: user.name, sex: 'Select', city: '', state: '' });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, isLoading, profiles.length]);
+
+  // ONBOARDING WALL: Auth Check
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <ProfileForm 
-          onClose={profiles.length > 0 ? () => setIsAddingProfile(false) : undefined}
-          onSave={(data) => {
-            addProfile(data);
-            setIsAddingProfile(false);
-          }}
-        />
+        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Auth />;
+  }
+
+  // ONBOARDING WALL: Profile Creation
+  if (isAddingProfile || (profiles.length === 0)) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        {isAddingProfile ? (
+          <ProfileForm 
+            onClose={profiles.length > 0 ? () => setIsAddingProfile(false) : undefined}
+            onSave={(data) => {
+              addProfile(data);
+              setIsAddingProfile(false);
+            }}
+          />
+        ) : (
+          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        )}
       </div>
     );
   }
@@ -106,7 +134,7 @@ function App() {
             className="flex items-center gap-3 rounded-xl px-2 py-1"
             style={{ backgroundColor: theme === 'dark' ? '#f8fafc' : 'transparent' }}
           >
-            <img src="/logo.png" alt="Shape Up" className="h-10 object-contain" />
+            <img src="/logo_transparent.png" alt="Shape Up" className="h-10 object-contain" />
           </div>
           
           <div className="flex items-center gap-2 sm:gap-4">
@@ -189,6 +217,15 @@ function App() {
                       >
                         <Plus className="w-4 h-4" />
                         Add New Profile
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsProfileMenuOpen(false);
+                          signOut();
+                        }}
+                        className="w-full flex items-center gap-2 px-4 py-2 mt-1 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+                      >
+                        Sign Out
                       </button>
                     </div>
                   </div>
