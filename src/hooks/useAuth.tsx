@@ -1,92 +1,71 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import type { User } from '../types';
+import type { User as AppUser } from '../types';
+import { auth } from '../lib/firebase';
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut as firebaseSignOut, 
+  sendPasswordResetEmail,
+  onAuthStateChanged,
+  updateProfile
+} from 'firebase/auth';
 
 interface AuthContextType {
-  user: User | null;
+  user: AppUser | null;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (name: string, email: string, password: string) => Promise<void>;
-  signOut: () => void;
+  signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const STORAGE_KEY_USERS = 'auth_users_v1';
-const STORAGE_KEY_ACTIVE = 'auth_active_user_v1';
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load initial session
   useEffect(() => {
-    const activeUserId = localStorage.getItem(STORAGE_KEY_ACTIVE);
-    if (activeUserId) {
-      const users: User[] = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS) || '[]');
-      const foundUser = users.find(u => u.id === activeUserId);
-      if (foundUser) {
-        setUser(foundUser);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUser({
+          id: firebaseUser.uid,
+          name: firebaseUser.displayName || 'User',
+          email: firebaseUser.email || '',
+        });
       } else {
-        localStorage.removeItem(STORAGE_KEY_ACTIVE);
+        setUser(null);
       }
-    }
-    setIsLoading(false);
+      setIsLoading(false);
+    });
+
+    return unsubscribe;
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    const users: User[] = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS) || '[]');
-    const foundUser = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
-    
-    if (!foundUser) {
-      throw new Error('Invalid email or password');
-    }
-
-    localStorage.setItem(STORAGE_KEY_ACTIVE, foundUser.id);
-    setUser(foundUser);
+    await signInWithEmailAndPassword(auth, email, password);
   };
 
   const signUp = async (name: string, email: string, password: string) => {
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    const users: User[] = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS) || '[]');
-    
-    if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-      throw new Error('Email is already registered');
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    if (userCredential.user) {
+      await updateProfile(userCredential.user, { displayName: name });
+      setUser({
+        id: userCredential.user.uid,
+        name,
+        email
+      });
     }
-
-    const newUser: User = {
-      id: crypto.randomUUID(),
-      name,
-      email,
-      password // In a real app, never store plain text passwords. This is a local mock.
-    };
-
-    const newUsers = [...users, newUser];
-    localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(newUsers));
-    localStorage.setItem(STORAGE_KEY_ACTIVE, newUser.id);
-    
-    setUser(newUser);
   };
 
-  const signOut = () => {
-    localStorage.removeItem(STORAGE_KEY_ACTIVE);
-    setUser(null);
+  const signOut = async () => {
+    localStorage.clear(); // Wipe all local cache entirely to prevent state crossover
+    await firebaseSignOut(auth);
   };
 
   const resetPassword = async (email: string) => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    const users: User[] = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS) || '[]');
-    
-    if (!users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-      throw new Error('No account found with this email address');
-    }
-    
-    // In our mock, we just pretend an email was sent.
+    await sendPasswordResetEmail(auth, email);
   };
 
   return (

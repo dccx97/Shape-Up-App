@@ -1,131 +1,71 @@
 import { useState, useEffect } from 'react';
 import type { HealthLog } from '../types';
+import { db } from '../lib/firebase';
+import { collection, doc, onSnapshot, setDoc, deleteDoc, writeBatch } from 'firebase/firestore';
 
-const STORAGE_KEY = 'app_health_logs';
-
-export function useHealth(activeProfileId: string | null) {
+export function useHealth(profileId: string | null, userId?: string) {
   const [healthLogs, setHealthLogs] = useState<HealthLog[]>([]);
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const parsed: HealthLog[] = JSON.parse(stored);
-        const profileLogs = parsed.filter(log => log.profileId === activeProfileId);
-        // Sort by date descending (newest first)
-        profileLogs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        setHealthLogs(profileLogs);
-      } catch (e) {
-        console.error("Failed to parse health logs", e);
-      }
-    } else {
+    if (!userId) {
       setHealthLogs([]);
+      return;
     }
-  }, [activeProfileId]);
 
-  const saveLogs = (logs: HealthLog[]) => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      let allLogs: HealthLog[] = [];
-      if (stored) {
-        allLogs = JSON.parse(stored);
+    const logsRef = collection(db, `users/${userId}/healthLogs`);
+
+    // Migration
+    const localLogs = localStorage.getItem('health_logs_v1');
+    if (localLogs) {
+      const batch = writeBatch(db);
+      try {
+        const parsed: HealthLog[] = JSON.parse(localLogs);
+        if (parsed.length > 0) {
+          parsed.forEach(l => { batch.set(doc(logsRef, l.id), l); });
+          batch.commit().then(() => {
+            localStorage.removeItem('health_logs_v1');
+            console.log('Migrated health logs to Firebase');
+          });
+        } else {
+          localStorage.removeItem('health_logs_v1');
+        }
+      } catch(e) {
+        localStorage.removeItem('health_logs_v1');
       }
-      
-      // Remove current profile's logs from allLogs, then append new ones
-      const otherProfiles = allLogs.filter(log => log.profileId !== activeProfileId);
-      const combined = [...otherProfiles, ...logs];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(combined));
-    } catch (e) {
-      console.error("Failed to save health logs", e);
     }
-  };
 
-  const addLog = (logData: Omit<HealthLog, 'id' | 'profileId'>) => {
-    if (!activeProfileId) return;
-
-    const newLog: HealthLog = {
-      ...logData,
-      id: crypto.randomUUID(),
-      profileId: activeProfileId
-    };
-
-    const newLogs = [newLog, ...healthLogs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    setHealthLogs(newLogs);
-    saveLogs(newLogs);
-  };
-
-  const deleteLog = (id: string) => {
-    const newLogs = healthLogs.filter(log => log.id !== id);
-    setHealthLogs(newLogs);
-    saveLogs(newLogs);
-  };
-
-  const updateLog = (id: string, updates: Omit<HealthLog, 'id' | 'profileId' | 'editHistory'>) => {
-    const existingLog = healthLogs.find(log => log.id === id);
-    if (!existingLog) return;
-
-    const changes: { field: string; oldValue: any; newValue: any }[] = [];
-    const keysToCheck: (keyof typeof updates)[] = ['date', 'weight', 'bodyFat', 'visceralFat', 'notes'];
-    
-    keysToCheck.forEach(key => {
-      if (existingLog[key] !== updates[key]) {
-        changes.push({
-          field: key,
-          oldValue: existingLog[key],
-          newValue: updates[key]
-        });
-      }
+    const unsubscribe = onSnapshot(logsRef, (snap) => {
+      const data: HealthLog[] = [];
+      snap.forEach(d => data.push(d.data() as HealthLog));
+      setHealthLogs(data);
     });
 
-    if (updates.customMetrics) {
-      const existingMetrics = existingLog.customMetrics || {};
-      const newMetrics = updates.customMetrics;
+    return () => unsubscribe();
+  }, [userId]);
 
-      Object.keys(newMetrics).forEach(metricId => {
-        if (existingMetrics[metricId] !== newMetrics[metricId]) {
-          changes.push({
-            field: `customMetrics.${metricId}`,
-            oldValue: existingMetrics[metricId],
-            newValue: newMetrics[metricId]
-          });
-        }
-      });
-      // Handle deleted metrics (not really expected during normal updates, but good for completeness)
-      Object.keys(existingMetrics).forEach(metricId => {
-        if (newMetrics[metricId] === undefined) {
-          changes.push({
-            field: `customMetrics.${metricId}`,
-            oldValue: existingMetrics[metricId],
-            newValue: undefined
-          });
-        }
-      });
-    }
+  const profileLogs = healthLogs.filter(l => l.profileId === profileId);
 
-    if (changes.length === 0) return; // No changes made
+  const addLog = async (log: Omit<HealthLog, 'id' | 'profileId'>) => {
+    if (!userId || !profileId) return;
+    const newId = crypto.randomUUID();
+    const newLog: HealthLog = { ...log, id: newId, profileId };
+    await setDoc(doc(db, `users/${userId}/healthLogs`, newId), newLog);
+  };
 
-    const newEdit = {
-      timestamp: new Date().toISOString(),
-      changes
-    };
+  const updateLog = async (id: string, updates: Partial<HealthLog>) => {
+    if (!userId) return;
+    await setDoc(doc(db, `users/${userId}/healthLogs`, id), updates, { merge: true });
+  };
 
-    const updatedLog: HealthLog = {
-      ...existingLog,
-      ...updates,
-      editHistory: [...(existingLog.editHistory || []), newEdit]
-    };
-
-    const newLogs = healthLogs.map(log => log.id === id ? updatedLog : log)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-    setHealthLogs(newLogs);
-    saveLogs(newLogs);
+  const deleteLog = async (id: string) => {
+    if (!userId) return;
+    await deleteDoc(doc(db, `users/${userId}/healthLogs`, id));
   };
 
   return {
-    healthLogs,
+    healthLogs: profileLogs,
     addLog,
-    deleteLog,
-    updateLog
+    updateLog,
+    deleteLog
   };
 }

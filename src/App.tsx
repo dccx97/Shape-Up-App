@@ -41,13 +41,14 @@ const calculateAge = (dob: string | undefined, legacyAge: number | undefined) =>
 };
 
 function App() {
-  const { profiles, activeProfile, activeProfileId, setActiveProfileId, addProfile, updateProfile } = useProfiles();
-  const { supplements, intakeLogs, addSupplement, updateSupplement, deleteSupplement, markTaken } = useSupplements(activeProfileId);
-  const { files, isLoading: filesLoading, addFile: addDocumentFile, deleteFile: deleteDocumentFile } = useFiles(activeProfileId);
-  const { healthLogs, addLog: addHealthLog, deleteLog: deleteHealthLog, updateLog: updateHealthLog } = useHealth(activeProfileId);
-  const { metrics, addMetric, deleteMetric } = useHealthMetrics();
-  const { workouts, workoutLogs, markWorkoutCompleted, addWorkout, updateWorkout, deleteWorkout } = useWorkouts(activeProfileId);
   const { user, isLoading, signOut } = useAuth();
+  
+  const { profiles, activeProfile, activeProfileId, isLoadingProfiles, setActiveProfileId, addProfile, updateProfile } = useProfiles(user?.id);
+  const { supplements, intakeLogs, addSupplement, updateSupplement, deleteSupplement, markTaken } = useSupplements(activeProfileId, user?.id);
+  const { files, isLoading: filesLoading, addFile: addDocumentFile, deleteFile: deleteDocumentFile } = useFiles(activeProfileId, user?.id);
+  const { healthLogs, addLog: addHealthLog, deleteLog: deleteHealthLog, updateLog: updateHealthLog } = useHealth(activeProfileId, user?.id);
+  const { metrics, addMetric, deleteMetric } = useHealthMetrics(user?.id);
+  const { workouts, workoutLogs, markWorkoutCompleted, addWorkout, updateWorkout, deleteWorkout } = useWorkouts(activeProfileId, user?.id);
   
   const [activeTab, setActiveTab] = useState<'dashboard' | 'cabinet' | 'workouts' | 'health' | 'analytics' | 'files'>('dashboard');
   const [theme, setTheme] = useState<Theme>(() => {
@@ -75,11 +76,11 @@ function App() {
 
   // Create default profile if none exist for a newly signed up user
   useEffect(() => {
-    if (user && !isLoading && profiles.length === 0 && !isAddingProfile) {
+    if (user && !isLoading && !isLoadingProfiles && profiles.length === 0 && !isAddingProfile) {
       addProfile({ name: user.name, sex: 'Select', city: '', state: '' });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, isLoading, profiles.length]);
+  }, [user, isLoading, isLoadingProfiles, profiles.length]);
 
   // ONBOARDING WALL: Auth Check
   if (isLoading) {
