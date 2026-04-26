@@ -74,13 +74,6 @@ function App() {
     if (theme === 'rose') document.body.classList.add('theme-rose');
   }, [theme]);
 
-  // Create default profile if none exist for a newly signed up user
-  useEffect(() => {
-    if (user && !isLoading && !isLoadingProfiles && profiles.length === 0 && !isAddingProfile) {
-      addProfile({ name: user.name, sex: 'Select', city: '', state: '' });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, isLoading, isLoadingProfiles, profiles.length]);
 
   // ONBOARDING WALL: Auth Check
   if (isLoading) {
@@ -96,20 +89,24 @@ function App() {
   }
 
   // ONBOARDING WALL: Profile Creation
+  if (isLoadingProfiles) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   if (isAddingProfile || (profiles.length === 0)) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        {isAddingProfile ? (
-          <ProfileForm 
-            onClose={profiles.length > 0 ? () => setIsAddingProfile(false) : undefined}
-            onSave={(data) => {
-              addProfile(data);
-              setIsAddingProfile(false);
-            }}
-          />
-        ) : (
-          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        )}
+        <ProfileForm 
+          onClose={profiles.length > 0 ? () => setIsAddingProfile(false) : undefined}
+          onSave={(data) => {
+            addProfile(data);
+            setIsAddingProfile(false);
+          }}
+        />
       </div>
     );
   }
