@@ -8,7 +8,7 @@ import { Files } from './components/Files';
 import { Health } from './components/Health';
 import { Workouts } from './components/Workouts';
 import { ProfileForm } from './components/ProfileForm';
-import { Pill, LayoutDashboard, Archive, LineChart, Palette, Check, User, ChevronDown, Plus, Edit2, AlertTriangle, ExternalLink, ShoppingCart, FolderOpen, Heart, Dumbbell } from 'lucide-react';
+import { LayoutDashboard, Archive, LineChart, Palette, Check, User, ChevronDown, Plus, Edit2, FolderOpen, Heart, Dumbbell } from 'lucide-react';
 import { cn } from './lib/utils';
 import { useFiles } from './hooks/useFiles';
 import { useHealth } from './hooks/useHealth';

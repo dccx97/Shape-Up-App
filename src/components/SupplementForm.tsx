@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import type { Supplement, Profile } from '../types';
-import { X, Upload, Share2 } from 'lucide-react';
+import { X, Upload } from 'lucide-react';
 
 interface SupplementFormProps {
   onClose: () => void;
@@ -23,6 +23,7 @@ const DAYS_OF_WEEK = [
 
 export function SupplementForm({ onClose, onSave, initialData, allProfiles, activeProfileId, onShare }: SupplementFormProps) {
   const [formData, setFormData] = useState<Omit<Supplement, 'id'>>({
+    profileId: initialData?.profileId || activeProfileId || '',
     name: initialData?.name || '',
     brand: initialData?.brand || '',
     schedule: initialData?.schedule || [0, 1, 2, 3, 4, 5, 6],

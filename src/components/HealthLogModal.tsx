@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { HealthLog, HealthMetric } from '../types';
 import { X } from 'lucide-react';
 import { format } from 'date-fns';

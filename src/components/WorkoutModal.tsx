@@ -209,7 +209,7 @@ export function WorkoutModal({ onClose, onSave, initialData }: WorkoutModalProps
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {formData.exercises.map((ex, index) => (
+                  {formData.exercises.map((ex) => (
                     <div key={ex.id} className="p-3 bg-white border border-slate-200 rounded-xl shadow-sm flex items-start gap-3">
                       <div className="flex-1 space-y-3">
                         <div>

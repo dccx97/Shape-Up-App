@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Supplement, Profile } from '../types';
-import { AlertTriangle, Plus, ExternalLink, Edit2, Trash2, Settings2, Pill, ShoppingCart } from 'lucide-react';
+import { AlertTriangle, Plus, ExternalLink, Edit2, Trash2, Pill, ShoppingCart } from 'lucide-react';
 import { SupplementForm } from './SupplementForm';
 import { AdjustQuantityModal } from './AdjustQuantityModal';
 import { cn } from '../lib/utils';

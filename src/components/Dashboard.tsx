@@ -7,7 +7,7 @@ import type { Supplement, IntakeLog, Profile, Workout, WorkoutLog } from '../typ
 interface DashboardProps {
   supplements: Supplement[];
   intakeLogs: IntakeLog[];
-  markTaken: (supplementId: string, date: string, timeOfDay: 'morning' | 'afternoon' | 'evening', taken?: boolean) => void;
+  markTaken: (supplementId: string, date: string, taken?: boolean) => void;
   activeProfile: Profile | null;
   workouts: Workout[];
   workoutLogs: WorkoutLog[];
@@ -93,8 +93,8 @@ export function Dashboard({
           
           {activeProfile && (
             <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border-2 border-rose-100 shadow-sm mb-1">
-              {activeProfile.avatar ? (
-                <img src={activeProfile.avatar} alt={activeProfile.name} className="w-6 h-6 rounded-full object-cover" />
+              {activeProfile.image ? (
+                <img src={activeProfile.image} alt={activeProfile.name} className="w-6 h-6 rounded-full object-cover" />
               ) : (
                 <div className="w-6 h-6 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center text-xs font-bold">
                   {activeProfile.name.charAt(0)}
@@ -302,7 +302,7 @@ export function Dashboard({
               <div key={supplement.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors group">
                 <div className="flex items-center gap-4">
                   <button
-                    onClick={() => markTaken(supplement.id, selectedDateStr, 'morning', !isCompleted)}
+                    onClick={() => markTaken(supplement.id, selectedDateStr, !isCompleted)}
                     className={cn(
                       "w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all shrink-0",
                       isCompleted 
@@ -334,12 +334,6 @@ export function Dashboard({
                     </div>
                   </div>
                 </div>
-                
-                {supplement.category && (
-                  <span className="bg-rose-50 text-rose-800 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded shrink-0 ml-4 hidden sm:block">
-                    {supplement.category}
-                  </span>
-                )}
               </div>
             );
           }) : (

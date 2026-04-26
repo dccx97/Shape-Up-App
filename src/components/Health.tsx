@@ -38,7 +38,7 @@ export function Health({ healthLogs, metrics, addMetric, deleteMetric, addLog, u
   const PADDING_X = 40;
 
   const metricValues = chartData.map(d => {
-    if (selectedMetric === 'weight') return d.weight;
+    if (selectedMetric === 'weight') return d.weight || 0;
     if (selectedMetric === 'bodyFat') return d.bodyFat || 0;
     if (selectedMetric === 'visceralFat') return d.visceralFat || 0;
     return d.customMetrics?.[selectedMetric] || 0;
@@ -57,7 +57,7 @@ export function Health({ healthLogs, metrics, addMetric, deleteMetric, addLog, u
 
   const points = chartData.map((d, i) => {
     let val = 0;
-    if (selectedMetric === 'weight') val = d.weight;
+    if (selectedMetric === 'weight') val = d.weight || 0;
     else if (selectedMetric === 'bodyFat') val = d.bodyFat || 0;
     else if (selectedMetric === 'visceralFat') val = d.visceralFat || 0;
     else val = d.customMetrics?.[selectedMetric] || 0;

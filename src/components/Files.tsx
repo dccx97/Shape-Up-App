@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { DocumentFile, FileCategory } from '../types';
 import { FileUploadModal } from './FileUploadModal';
-import { Plus, Download, ExternalLink, Trash2, FileText, Image as ImageIcon } from 'lucide-react';
+import { Plus, Download, ExternalLink, Trash2, FileText } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { format } from 'date-fns';
 

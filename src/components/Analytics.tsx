@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Supplement, IntakeLog, WorkoutLog } from '../types';
-import { subDays, startOfToday, isSameDay, getDay, format } from 'date-fns';
-import { TrendingUp, Award, CalendarX, Target, Activity } from 'lucide-react';
+import { subDays, startOfToday, getDay, format } from 'date-fns';
+import { Award, CalendarX, Target, Activity } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface AnalyticsProps {
