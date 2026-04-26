@@ -43,7 +43,7 @@ const calculateAge = (dob: string | undefined, legacyAge: number | undefined) =>
 function App() {
   const { user, isLoading, signOut } = useAuth();
   
-  const { profiles, activeProfile, activeProfileId, isLoadingProfiles, setActiveProfileId, addProfile, updateProfile } = useProfiles(user?.id);
+  const { profiles, activeProfile, activeProfileId, isLoadingProfiles, setActiveProfileId, addProfile, updateProfile, deleteProfile } = useProfiles(user?.id);
   const { supplements, intakeLogs, addSupplement, updateSupplement, deleteSupplement, markTaken } = useSupplements(activeProfileId, user?.id);
   const { files, isLoading: filesLoading, addFile: addDocumentFile, deleteFile: deleteDocumentFile } = useFiles(activeProfileId, user?.id);
   const { healthLogs, addLog: addHealthLog, deleteLog: deleteHealthLog, updateLog: updateHealthLog } = useHealth(activeProfileId, user?.id);
@@ -116,14 +116,20 @@ function App() {
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
       {editingProfileId && (
-        <ProfileForm 
-          initialData={editingProfile}
-          onClose={() => setEditingProfileId(null)}
-          onSave={(data) => {
-            updateProfile(editingProfileId, data);
-            setEditingProfileId(null);
-          }}
-        />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm overflow-y-auto">
+          <ProfileForm 
+            initialData={editingProfile}
+            onClose={() => setEditingProfileId(null)}
+            onDelete={(id) => {
+              deleteProfile(id);
+              setEditingProfileId(null);
+            }}
+            onSave={(data) => {
+              updateProfile(editingProfileId, data);
+              setEditingProfileId(null);
+            }}
+          />
+        </div>
       )}
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10 transition-colors duration-200">

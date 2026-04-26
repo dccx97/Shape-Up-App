@@ -114,6 +114,7 @@ export function Auth() {
                         required
                         value={name}
                         onChange={(e) => setName(e.target.value)}
+                        autoComplete="name"
                         className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm transition-all bg-slate-50 focus:bg-white"
                         placeholder="John Doe"
                       />
@@ -134,6 +135,7 @@ export function Auth() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      autoComplete="email"
                       className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm transition-all bg-slate-50 focus:bg-white"
                       placeholder="you@example.com"
                     />
@@ -168,6 +170,7 @@ export function Auth() {
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                         className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm transition-all bg-slate-50 focus:bg-white"
                         placeholder="••••••••"
                       />
@@ -189,6 +192,7 @@ export function Auth() {
                         required
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
+                        autoComplete="new-password"
                         className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm transition-all bg-slate-50 focus:bg-white"
                         placeholder="••••••••"
                       />

@@ -13,10 +13,11 @@ const US_STATES = [
 interface ProfileFormProps {
   onClose?: () => void; // Optional: if missing, it's a forced onboarding form
   onSave: (data: Omit<Profile, 'id'>) => void;
+  onDelete?: (id: string) => void;
   initialData?: Profile;
 }
 
-export function ProfileForm({ onClose, onSave, initialData }: ProfileFormProps) {
+export function ProfileForm({ onClose, onSave, onDelete, initialData }: ProfileFormProps) {
   const [formData, setFormData] = useState<Omit<Profile, 'id'>>({
     name: initialData?.name || '',
     sex: initialData?.sex || '',
@@ -186,8 +187,24 @@ export function ProfileForm({ onClose, onSave, initialData }: ProfileFormProps) 
 
         </form>
 
-        <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
-          {onClose && (
+        <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-between gap-3">
+          <div>
+            {initialData && onDelete && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm("Are you sure you want to delete this profile? This action cannot be undone.")) {
+                    onDelete(initialData.id);
+                  }
+                }}
+                className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                Delete Profile
+              </button>
+            )}
+          </div>
+          <div className="flex gap-3">
+            {onClose && (
             <button
               type="button"
               onClick={onClose}
@@ -202,6 +219,7 @@ export function ProfileForm({ onClose, onSave, initialData }: ProfileFormProps) 
           >
             {initialData ? 'Save Profile' : 'Continue'}
           </button>
+          </div>
         </div>
       </div>
     </div>
